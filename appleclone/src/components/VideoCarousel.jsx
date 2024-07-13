@@ -1,7 +1,59 @@
+import { useEffect, useRef, useState } from "react"
 import { hightlightsSlides } from "../constants"
+import gsap from "gsap"
+import {useGSAP} from "@gsap/react"
 
 
 const VideoCarousel = () => {
+    const videoRef = useRef([]);
+    const videoSpanRef = useRef([]);
+    const videoDiviRef = useRef([]);
+
+    const[video, setvideo] =useState({
+        isEnd: false,
+        startPlay: false,
+        videoId: 0,
+        isLastVideo: false,
+        isPlaying: false, 
+    }) 
+
+    const [loadData,setLoadedData]  = useState([])
+  //Destructuring 
+    const [ isEnd ,startPlay, videoId, isLastVideo, isPlaying ]  = video;
+  
+    useEffect(()=>{
+if(loadData.length >3){
+    if(!isPlaying){
+        video.current[videoId].pause();
+    }else {
+        startPlay && video.current[videoId].play();
+    }
+}
+    })
+     
+  //for rendering of video
+     useEffect(() =>{
+ 
+     },[startPlay, videoId, isPlaying, loadData])
+    //Animating progress but, we don't know where is that  progress
+    
+    useEffect(() => {
+        const currentProgress = 0;
+        let span = videoSpanRef.current;
+
+        if(span[videoId]){
+            //animate the progress of the video
+            let anim = gsap.to(span[videoId],{
+                onUpdate: () =>{
+
+                },
+
+                onComplete: () =>{
+
+                }
+            })
+        }
+    })
   return (
     <>
        <div>
