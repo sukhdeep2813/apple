@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react"
 import { hightlightsSlides } from "../constants"
 import gsap from "gsap"
 import {useGSAP} from "@gsap/react"
+import { pauseImg, playImg } from "../utils"
 
 
 const VideoCarousel = () => {
@@ -9,7 +10,7 @@ const VideoCarousel = () => {
     const videoSpanRef = useRef([]);
     const videoDiviRef = useRef([]);
 
-    const[video, setvideo] =useState({
+    const[video, setVideo] =useState({
         isEnd: false,
         startPlay: false,
         videoId: 0,
@@ -19,21 +20,20 @@ const VideoCarousel = () => {
 
     const [loadData,setLoadedData]  = useState([])
   //Destructuring 
-    const [ isEnd ,startPlay, videoId, isLastVideo, isPlaying ]  = video;
+    const {isEnd ,startPlay, videoId, isLastVideo, isPlaying }  = video;
   
-    useEffect(()=>{
-if(loadData.length >3){
-    if(!isPlaying){
-        video.current[videoId].pause();
-    }else {
-        startPlay && video.current[videoId].play();
-    }
-}
-    })
+
      
   //for rendering of video
      useEffect(() =>{
- 
+       if(loadData.length > 3){
+        if(!isPlaying){
+            videoRef.current[videoId].pause();
+
+        }else{
+            startPlay && videoRef.current[videoId].play();
+        }
+       }
      },[startPlay, videoId, isPlaying, loadData])
     //Animating progress but, we don't know where is that  progress
     
@@ -53,7 +53,31 @@ if(loadData.length >3){
                 }
             })
         }
-    })
+    },[videoId, startPlay])
+
+   const handleProcess = (type, i) => {
+    switch(type){
+        case 'video-end':
+            setVideo((pre) => ({...pre, isEnd: true,
+            videoId: i+1  }))
+            break;
+        case 'video-last':
+            setVideo((pre) => ({...pre, isLastVideo: 
+            true}))
+            break;
+        case 'video-reset':
+                setVideo((pre) => ({...pre, isLastVideo: false,
+                videoId: 0}))
+                break;
+        case 'play':
+                setVideo((pre) => ({...pre, isPlaying: !pre.isPlaying}))
+                break;
+    
+         default:
+            break  
+    }
+   }
+    
   return (
     <>
        <div>
@@ -66,6 +90,10 @@ if(loadData.length >3){
                           playsInline={true}
                           muted
                           preload="auto"
+                          ref={(el) => (videoRef.current[i] = el)}
+                          onPlay={() =>{setVideo((prevVideo)=> ({
+                            ...prevVideo, isPlaying: true
+                          }))}}
                          >
                              <source src={list.video} type="video/mp4"/>
 
@@ -83,6 +111,38 @@ if(loadData.length >3){
             </div>
            ))}
        </div>
+        
+        <div className="flex-center mt-5 relative">
+            <div className="flex-center py-5 px-7 bg-gray-300 
+            backdrop-blur rounded-full">
+                {videoRef.current.map((_, i) =>(
+                    <span
+                    key={i}
+                    ref={(el) => (videoRef.current[i] =el)}
+                    className="mx-2 w-3 h-3 bg-gray-200 rounded-full relative current pointer">
+                        <span className="absolute h-full w-fullcrounded-full" 
+                        ref={(el) => (videoSpanRef.current[i]  =el)}
+                        />
+                    </span>
+                ))}
+            </div>
+            <button className="control-btn">
+                <img
+                  src={isLastVideo ? replaying:
+                    !isPlaying ? playImg: pauseImg}
+                    alt={isLastVideo ? "replay" :
+                        !isPlaying ? "play": "pause"
+                    }
+                    onClick={isLastVideo 
+                        ? () => handleProcess("video-reset")
+                        : !isPlaying 
+                        ? () =>handleProcess('play')
+                        : () =>handleProcess('pause')
+                    }
+                />
+            </button>
+        </div>
+   
     </>
   )
 }
