@@ -74,7 +74,7 @@ const VideoCarousel = () => {
                 break;
     
          default:
-            break  
+            return video
     }
    }
     
